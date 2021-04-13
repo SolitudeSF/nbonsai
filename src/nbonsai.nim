@@ -11,7 +11,7 @@ type
     bkTrunk, bkLeft, bkRight, bkDying, bkDead
 
   Config = object
-    life, mult: int
+    life, mult, pad: int
     live: bool
     step: float
     leaves: seq[string]
@@ -224,7 +224,7 @@ proc branch(tb: var TermBuffer, x, y: int, kind: BranchKind, life: int,
     let age = config.life - life
 
     var (dx, dy) = delta(kind, age, life, config.mult)
-    if dy > 0 and y > (tb.height.int - 2): dec dy
+    if dy > 0 and y > config.pad: dec dy
 
     if life < 3:
       addBranch bkDead, life
@@ -286,15 +286,16 @@ proc nbonsai(
   else:
     randomize(seed)
 
+  var tb = initTerminal()
+
   let config = Config(
     life: life,
     mult: multiplier,
+    pad: tb.height.int - base.size.height - 2,
     step: step,
     live: live,
     leaves: leaves.split ','
   )
-  var tb = initTerminal()
-
   while true:
     tb.drawBase base
     tb.growTree base.size.height, config
