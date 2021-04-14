@@ -153,38 +153,25 @@ proc delta(kind: BranchKind, age, life, mult: int): tuple[x, y: int] =
 func selectBranchSym(kind: BranchKind, x, y: int): string =
   case kind
   of bkTrunk:
-    if y == 0:
-      r"/~"
-    elif x < 0:
-      r"\|"
-    elif x == 0:
-      r"/|\"
-    elif x > 0:
-      r"|/"
+    if y == 0:   r"/~"
+    elif x < 0:  r"\|"
+    elif x == 0: r"/|\"
+    elif x > 0:  r"|/"
     else: "?"
   of bkLeft:
-    if y > 0:
-      r"\"
-    elif y == 0:
-      r"\_"
-    elif x < 0:
-      r"\|"
-    elif x == 0:
-      r"/|"
+    if y > 0:    r"\"
+    elif y == 0: r"\_"
+    elif x < 0:  r"\|"
+    elif x == 0: r"/|"
     elif x > 0:
       r"/"
     else: "?"
   of bkRight:
-    if y > 0:
-      r"/"
-    elif y == 0:
-      r"_/"
-    elif x < 0:
-      r"\|"
-    elif x == 0:
-      r"/|"
-    elif x > 0:
-      r"/"
+    if y > 0:    r"/"
+    elif y == 0: r"_/"
+    elif x < 0:  r"\|"
+    elif x == 0: r"/|"
+    elif x > 0:  r"/"
     else: "?"
   else: "?"
 
@@ -233,7 +220,7 @@ proc branch(tb: var TermBuffer, x, y: int, kind: BranchKind, life: int,
       addBranch bkDying, life
     elif kind == bkTrunk and
       (oneIn(3) or (life mod config.mult) == 0):
-      # (rand(mult - 1) == 0 or (life > mult and life mod mult == 0)):
+      # (oneIn(mult - 1) or (life > mult and life mod mult == 0)):
 
       if oneIn(8) and life > 7:
         shootCooldown = config.mult * 2
@@ -285,7 +272,7 @@ proc nbonsai(
   live = false,
   infinite = false,
   print = false,
-  wait = 4,
+  wait = 4.0,
   step = 0.03,
   life = 32,
   multiplier = 5,
@@ -314,7 +301,7 @@ proc nbonsai(
     tb.growTree base.size.height, config
 
     if infinite:
-      sleep(wait * 1000)
+      sleep int(wait * 1000)
       tb.clear
       seed = genSeed()
       randomize(seed)
