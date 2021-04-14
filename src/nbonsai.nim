@@ -1,4 +1,4 @@
-import random, strutils
+import random, strutils, base64, endians
 from os import sleep
 from terminal import getch
 import cligen, ternim
@@ -29,7 +29,7 @@ func size(base: BaseKind): tuple[width, height: int] =
   of baseBig: (31, 4)
   of baseSmall: (15, 3)
 
-proc drawBase(tb: var TermBuffer, base: BaseKind) =
+proc drawBase(tb: var TermBuffer, base: BaseKind, seed: string) =
   let
     (baseWidth, baseHeight) = base.size
     baseOriginY = tb.height.int - baseHeight
@@ -58,6 +58,8 @@ proc drawBase(tb: var TermBuffer, base: BaseKind) =
     tb[0..layer2.len >> baseOriginX, baseOriginY + 2] = bold brBlack layer2
     tb[0..layer3.len >> baseOriginX, baseOriginY + 3] = bold brBlack layer3
 
+    tb[0..seed.len >> baseOriginX + 10, baseOriginY + 1] = black blackBg seed
+
   of baseSmall:
     const
       grass = "---"
@@ -77,6 +79,8 @@ proc drawBase(tb: var TermBuffer, base: BaseKind) =
 
     tb[0..layer1.len >> baseOriginX, baseOriginY + 1] = bold brBlack layer1
     tb[0..layer2.len >> baseOriginX, baseOriginY + 2] = bold brBlack layer2
+
+    tb[0..seed.len >> baseOriginX + 2, baseOriginY + 1] = black blackBg seed
 
   tb.display
 
@@ -263,6 +267,22 @@ proc growTree(tb: var TermBuffer, height: int, config: Config) =
   tb.branch(tb.width.int div 2, tb.height.int - height - 1, bkTrunk, config.life, nextShoot, config)
   tb.display
 
+proc seedToBase64(seed: int64): string =
+  var seedByteArray: array[8, byte]
+  bigEndian64(addr seedByteArray, unsafeAddr seed)
+  encode(seedByteArray).strip(chars = {'='})
+
+proc base64ToSeed(s: string): int64 =
+  var decoded = decode s
+  decoded.setLen 8
+  var seedByteArray: array[8, byte]
+  bigEndian64(addr seedByteArray, addr decoded[0])
+  cast[int64](seedByteArray)
+
+proc genSeed(): int64 =
+  randomize()
+  rand(int64)
+
 proc nbonsai(
   live = false,
   infinite = false,
@@ -272,14 +292,14 @@ proc nbonsai(
   life = 32,
   multiplier = 5,
   base = baseBig,
-  seed = 0,
+  seed = "",
   leaves = "&"
 ) =
 
-  if seed == 0:
-    randomize()
-  else:
-    randomize(seed)
+  var seed = if seed == "": genSeed()
+             else: base64ToSeed(seed)
+
+  randomize(seed)
 
   var tb = initTerminal()
 
@@ -292,13 +312,14 @@ proc nbonsai(
     leaves: leaves.split ','
   )
   while true:
-    tb.drawBase base
+    tb.drawBase base, seedToBase64(seed)
     tb.growTree base.size.height, config
 
     if infinite:
       sleep(wait * 1000)
       tb.clear
-      randomize()
+      seed = genSeed()
+      randomize(seed)
     else:
       break
 
