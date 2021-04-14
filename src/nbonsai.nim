@@ -1,6 +1,7 @@
-import random, strutils, posix
+import random, strutils
 from os import sleep
 from terminal import getch
+from times import nil
 import cligen, ternim
 
 type
@@ -23,11 +24,6 @@ func `>>`(s: Slice[int], o: int): Slice[int] =
 
 proc oneIn(i: int): bool =
   rand(i + 1) == 0
-
-proc nanosleep(f: float) =
-  var a = Timespec(tv_sec: f.Time)
-  a.tv_nsec = clong((f - a.tv_sec.float) * 1_000_000_000)
-  discard nanosleep(a, cast[var Timespec](nil))
 
 func size(base: BaseKind): tuple[width, height: int] =
   case base
@@ -261,7 +257,7 @@ proc branch(tb: var TermBuffer, x, y: int, kind: BranchKind, life: int,
 
     if config.live:
       tb.display
-      nanosleep config.step
+      sleep int(config.step * 1000)
 
 proc growTree(tb: var TermBuffer, height: int, config: Config) =
   var nextShoot = rand bkLeft..bkRight
