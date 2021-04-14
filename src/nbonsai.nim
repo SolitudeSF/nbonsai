@@ -163,8 +163,7 @@ func selectBranchSym(kind: BranchKind, x, y: int): string =
     elif y == 0: r"\_"
     elif x < 0:  r"\|"
     elif x == 0: r"/|"
-    elif x > 0:
-      r"/"
+    elif x > 0:  r"/"
     else: "?"
   of bkRight:
     if y > 0:    r"/"
