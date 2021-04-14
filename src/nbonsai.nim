@@ -22,7 +22,7 @@ func `>>`(s: Slice[int], o: int): Slice[int] =
   s.a + o..s.b + o
 
 proc oneIn(i: int): bool =
-  rand(i + 1) == 0
+  rand(i - 1) == 0
 
 func size(base: BaseKind): tuple[width, height: int] =
   case base
