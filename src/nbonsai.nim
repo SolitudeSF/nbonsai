@@ -10,11 +10,15 @@ type
   BranchKind = enum
     bkTrunk, bkLeft, bkRight, bkDying, bkDead
 
+  TreeKind = enum
+    tkPine = "pine", tkSakura = "sakura"
+
   Config = object
     life, mult, pad: int
     live: bool
     step: float
     leaves: seq[string]
+    treeKind: TreeKind
 
 proc rand(i: static[int]): range[0..i] = random.rand i
 
@@ -175,23 +179,42 @@ func selectBranchSym(kind: BranchKind, x, y: int): string =
     else: "?"
   else: "?"
 
-proc colored(s: string, kind: BranchKind): TermCells =
-  case kind
-  of bkTrunk, bkLeft, bkRight:
-    if oneIn 2:
-      bold brYellow s
-    else:
-      yellow s
-  of bkDying:
-    if oneIn 10:
-      bold green s
-    else:
-      green s
-  of bkDead:
-    if oneIn 3:
-      bold brGreen s
-    else:
-      brGreen s
+proc colored(s: string, kind: BranchKind, treeKind: TreeKind): TermCells =
+  case treeKind
+  of tkPine:
+    case kind
+    of bkTrunk, bkLeft, bkRight:
+      if oneIn 2:
+        bold brYellow s
+      else:
+        yellow s
+    of bkDying:
+      if oneIn 10:
+        bold green s
+      else:
+        green s
+    of bkDead:
+      if oneIn 3:
+        bold brGreen s
+      else:
+        brGreen s
+  of tkSakura:
+    case kind
+    of bkTrunk, bkLeft, bkRight:
+      if oneIn 2:
+        bold brBlack s
+      else:
+        brBlack s
+    of bkDying:
+      if oneIn 10:
+        bold brWhite s
+      else:
+        brWhite s
+    of bkDead:
+      if oneIn 3:
+        bold brMagenta s
+      else:
+        brMagenta s
 
 proc branch(tb: var TermBuffer, x, y: int, kind: BranchKind, life: int,
   nextShoot: var BranchKind, config: Config) =
@@ -243,7 +266,7 @@ proc branch(tb: var TermBuffer, x, y: int, kind: BranchKind, life: int,
           selectBranchSym(kind, dx, dy)
       xslice = x..x + branchSym.len
 
-    tb[xslice, y] = branchSym.colored kind
+    tb[xslice, y] = branchSym.colored(kind, config.treeKind)
 
     if config.live:
       tb.display
@@ -278,7 +301,8 @@ proc nbonsai(
   multiplier = 5,
   base = baseBig,
   seed = "",
-  leaves = "&"
+  leaves = "&",
+  kind = tkPine
 ) =
 
   var seed = if seed == "": genSeed()
@@ -294,7 +318,8 @@ proc nbonsai(
     pad: tb.height.int - base.size.height - 2,
     step: step,
     live: live,
-    leaves: leaves.split ','
+    leaves: leaves.split ',',
+    treeKind: kind
   )
   while true:
     tb.drawBase base, seedToBase64(seed)
