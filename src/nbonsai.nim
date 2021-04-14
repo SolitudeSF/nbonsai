@@ -275,9 +275,7 @@ proc seedToBase64(seed: int64): string =
 proc base64ToSeed(s: string): int64 =
   var decoded = decode s
   decoded.setLen 8
-  var seedByteArray: array[8, byte]
-  bigEndian64(addr seedByteArray, addr decoded[0])
-  cast[int64](seedByteArray)
+  bigEndian64(addr result, addr decoded[0])
 
 proc genSeed(): int64 =
   randomize()
