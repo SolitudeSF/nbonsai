@@ -1,7 +1,6 @@
 import random, strutils
 from os import sleep
 from terminal import getch
-from times import nil
 import cligen, ternim
 
 type
