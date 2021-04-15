@@ -301,7 +301,7 @@ proc nbonsai(
   base = baseBig,
   seed = "",
   leaves = "&",
-  kind = tkPine
+  tree = tkPine
 ) =
 
   var seed = if seed == "": genSeed()
@@ -318,7 +318,7 @@ proc nbonsai(
     step: step,
     live: live,
     leaves: leaves.split ',',
-    treeKind: kind
+    treeKind: tree
   )
   while true:
     tb.drawBase base, seedToBase64(seed)
