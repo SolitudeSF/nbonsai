@@ -334,11 +334,7 @@ proc nbonsai(
 
   if print:
     deinitTernim()
-    var line = ""
-    for y in 0'u16..<tb.height:
-      line.toString tb.buf.toOpenArray(int(tb.width * y), int(tb.width * y.succ - 1))
-      stdout.writeLine line
-      line.setLen 0
+    stdout.writeLine toString(tb)
   else:
     discard getch()
     deinitTernim()
